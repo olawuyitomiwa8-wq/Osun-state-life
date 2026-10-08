@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Osun State Life</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#eef2f5;color:#17202a}
+.wrap{max-width:850px;margin:auto;padding:18px}.card{background:white;border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 3px 12px #0001}
+h1,h2,h3{margin:0 0 8px}.tag{color:#667085}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#f6f8fa;padding:12px;border-radius:12px}.value{font-weight:bold;font-size:18px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.place{padding:16px;text-align:left;border:1px solid #d9dee5;border-radius:14px;background:#fff;font-size:15px;cursor:pointer}.place:hover{background:#f4f7f9}
+button{border:0;border-radius:10px;padding:12px 15px;cursor:pointer;background:#17202a;color:white}input,select{padding:12px;border:1px solid #ccd3da;border-radius:10px;width:100%;font-size:16px}.row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.field{flex:1;min-width:180px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.notice{margin-top:12px;color:#667085;min-height:24px}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="card">
+<div class="tag">WELCOME TO</div><h1>OSUN STATE LIFE</h1>
+<p class="tag">Your life. Your money. Your Osun.</p>
+<div class="stats">
+<div class="stat">💰 Cash<div id="cash" class="value">₦10,000</div></div>
+<div class="stat">💼 Job<div id="job" class="value">Unemployed</div></div>
+<div class="stat">🏠 Home<div id="home" class="value">None</div></div>
+<div class="stat">📍 City<div class="value">Osogbo</div></div>
+</div>
+</div>
+
+<div class="card">
+<h2>Create your character</h2>
+<form id="form" class="row">
+<div class="field"><label>Name<br><input id="name" maxlength="24" required placeholder="Your name"></label></div>
+<div style="min-width:140px"><label>Avatar<br><select id="avatar"><option>🧑🏿</option><option>👨🏿</option><option>👩🏿</option><option>🧑🏾</option></select></label></div>
+<button>Start Life</button>
+</form>
+<p id="welcome" class="notice">Create your character to begin.</p>
+</div>
+
+<div class="card">
+<h2>Explore Osogbo</h2>
+<div class="grid">
+<button class="place" data-place="Job Centre">💼 <b>Job Centre</b><br><small>Find work and earn money</small></button>
+<button class="place" data-place="Market">🛒 <b>Market</b><br><small>Buy food and supplies</small></button>
+<button class="place" data-place="Bank">🏦 <b>Bank</b><br><small>Manage your money</small></button>
+<button class="place" data-place="Housing Office">🏠 <b>Housing</b><br><small>Rent a place to live</small></button>
+</div>
+<div id="notice" class="notice">Choose a location.</div>
+<div id="actions" class="actions"></div>
+</div>
+</div>
+
+<script>
+const s={cash:10000,job:"Unemployed",home:"None",name:""};
+const money=n=>"₦"+Math.max(0,Math.floor(n)).toLocaleString("en-NG");
+const $=id=>document.getElementById(id);
+function render(){$("cash").textContent=money(s.cash);$("job").textContent=s.job;$("home").textContent=s.home}
+$("form").addEventListener("submit",e=>{e.preventDefault();s.name=$("name").value.trim();$("welcome").textContent="Welcome, "+s.name+"! Your Osun State life has begun. You have "+money(s.cash)+".";render()});
+function show(p){
+ $("notice").textContent="You arrived at "+p+".";
+ const a=$("actions");a.innerHTML="";
+ if(p==="Job Centre")a.innerHTML='<button data-pay="3000" data-job="Shop Assistant">🛍️ Shop Assistant — ₦3,000/day</button><button data-pay="4500" data-job="Driver">🚗 Driver — ₦4,500/day</button><button data-pay="3500" data-job="Market Trader">🥬 Market Trader — ₦3,500/day</button>';
+ if(p==="Market")a.innerHTML='<button data-buy="500">🍲 Buy food — ₦500</button><button data-buy="1200">🛍️ Shopping — ₦1,200</button>';
+ if(p==="Bank")a.innerHTML='<button id="bonus">Collect daily bonus — ₦250</button>';
+ if(p==="Housing Office")a.innerHTML='<button data-home="Room" data-cost="3000">🛏️ Rent a room — ₦3,000</button><button data-home="Apartment" data-cost="8000">🏢 Rent apartment — ₦8,000</button>';
+ a.querySelectorAll("[data-job]").forEach(b=>b.onclick=()=>{s.job=b.dataset.job;s.cash+=+b.dataset.pay;$("notice").textContent="You got the "+s.job+" job and earned "+money(+b.dataset.pay)+".";render()});
+ a.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{let c=+b.dataset.buy;if(s.cash<c){$("notice").textContent="Not enough cash.";return}s.cash-=c;$("notice").textContent="Purchase completed. You spent "+money(c)+".";render()});
+ a.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>{let c=+b.dataset.cost;if(s.cash<c){$("notice").textContent="Not enough cash.";return}s.cash-=c;s.home=b.dataset.home;$("notice").textContent="You now live in a "+s.home+".";render()});
+ const bonus=$("bonus");if(bonus)bonus.onclick=()=>{s.cash+=250;bonus.disabled=true;$("notice").textContent="Daily bonus collected: ₦250.";render()};
+}
+document.querySelectorAll(".place").forEach(b=>b.onclick=()=>show(b.dataset.place));render();
+</script>
+</body>
+</html>
